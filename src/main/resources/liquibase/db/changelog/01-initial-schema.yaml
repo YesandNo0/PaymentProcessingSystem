@@ -1,0 +1,194 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01-01-create-accounts-table
+      author: sasha
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: accounts
+      changes:
+        - createTable:
+            tableName: accounts
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(150)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: username
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password_hash
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 01-02-create-bank-card-info-table
+      author: sasha
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: bank_card_info
+      changes:
+        - createTable:
+            tableName: bank_card_info
+            columns:
+              - column:
+                  name: card_number
+                  type: varchar(19)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    unique: true
+              - column:
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_card_account
+                    references: accounts(id)
+              - column:
+                  name: balance
+                  type: NUMERIC(19,2)
+                  constraints:
+                    nullable: false
+                  defaultValue: 0.00
+              - column:
+                  name: card_expiry_date
+                  type: varchar(5)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cvv
+                  type: int
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 01-03-create-payments-table
+      author: sasha
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: payments
+      changes:
+        - createTable:
+            tableName: payments
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: amount
+                  type: NUMERIC(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_payment_account
+                    references: accounts(id)
+
+  - changeSet:
+      id: 01-04-create-subscriptions-table
+      author: sasha
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: subscriptions
+      changes:
+        - createTable:
+            tableName: subscriptions
+            columns:
+              - column:
+                  name: subscription_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_subscription_account
+                    references: accounts(id)
+              - column:
+                  name: start_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: DATE
+              - column:
+                  name: amount
+                  type: NUMERIC(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 01-05-create-indices
+      author: sasha
+      preConditions:
+        onFail: MARK_RAN
+        and:
+          - not:
+              indexExists:
+                indexName: idx_payments_account_id
+          - not:
+              indexExists:
+                indexName: idx_payments_timestamp
+      changes:
+        - createIndex:
+            indexName: idx_payments_account_id
+            tableName: payments
+            columns:
+              - column:
+                  name: account_id
+        - createIndex:
+            indexName: idx_payments_timestamp
+            tableName: payments
+            columns:
+              - column:
+                  name: timestamp

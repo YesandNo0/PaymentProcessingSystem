@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Payment Result</title>
+    <link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .payment-result {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        .payment-result h2 {
+            color: #333;
+        }
+        .payment-result p {
+            color: #555;
+        }
+        .payment-result a {
+            display: inline-block;
+            margin-top: 15px;
+            color: #28a745;
+            text-decoration: none;
+        }
+        .payment-result a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="payment-result">
+    <h2 th:text="${response.status == 'APPROVED'} ? 'Payment Approved' : 'Payment Declined'"></h2>
+
+    <p th:if="${response.status == 'APPROVED'}">
+        Transaction ID: <span th:text="${response.transactionId}"></span>
+    </p>
+    <p th:if="${response.status == 'APPROVED'}">
+        <a th:href="@{'/invoice/' + ${response.transactionId}}" target="_blank">
+            Download Invoice PDF
+        </a>
+    </p>
+
+    <p th:if="${response.status != 'APPROVED' and response.error != null}"
+       class="error-message"
+       th:text="${response.error}"></p>
+
+    <a href="/payments">New Payment</a>
+</div>
+</body>
+</html> 
